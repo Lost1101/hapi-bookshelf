@@ -10,7 +10,6 @@ const addBookHandler = (req, h) => {
     const updatedAt = insertedAt;
 
     if (readPage === pageCount){
-        reading = true;
         finished = true;
     }
 
@@ -122,7 +121,6 @@ const editBookByIdHandler = (req, h) =>{
 
         if(index !== -1){
             if (readPage === pageCount){
-                reading = true;
                 finished = true;
             }
 
