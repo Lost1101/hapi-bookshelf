@@ -1,9 +1,8 @@
 const { nanoid } = require('nanoid');
-const books = require('./books')
+const books = require('./books');
 
 const addBookHandler = (req, h) => {
-    const { name, year, author, summary, publisher, pageCount, readPage } = req.payload;
-    let { reading } = req.payload;
+    const { name, year, author, summary, publisher, pageCount, readPage, reading } = req.payload;
     const id = nanoid(16);
     let finished = false;
     const insertedAt = new Date().toISOString();
@@ -11,7 +10,7 @@ const addBookHandler = (req, h) => {
 
     if (readPage === pageCount){
         finished = true;
-    }
+    };
 
     const newBook = {
         id, name, year, author, summary, publisher, pageCount, readPage, finished, reading, insertedAt, updatedAt
@@ -25,7 +24,7 @@ const addBookHandler = (req, h) => {
               });
               response.code(400);
               return response;
-        }
+        };
 
         books.push(newBook);
         const isSuccess = books.filter((books) => books.id === id).length > 0;
@@ -40,7 +39,7 @@ const addBookHandler = (req, h) => {
             });
             response.code(201);
             return response;
-          }
+          };
          
           const response = h.response({
             status: 'fail',
@@ -48,7 +47,7 @@ const addBookHandler = (req, h) => {
           });
           response.code(500);
           return response;
-    }
+    };
 
     const response = h.response({
         status: 'fail',
@@ -59,16 +58,38 @@ const addBookHandler = (req, h) => {
 };
 
 const getAllBooksHandler = (req, h) => {
-    const booksFilter = books.map(book => ({
-        id: book.id,
-        name: book.name,
-        publisher: book.publisher
-    }));
+    const { name, reading, finished } = req.query;
+    let bookFilter = books;
+
+    if (name !== undefined) {
+        console.log(name, typeof(name))
+        bookFilter = bookFilter.filter((book) => 
+            book.name.toLowerCase().includes(name.toLowerCase())
+        );
+    };
+
+    if(reading !== undefined) {
+        const bool = Boolean(parseInt(reading))
+        bookFilter = bookFilter.filter((book) => 
+           book.reading === bool
+        );
+    };
+    
+    if(finished !== undefined) {
+        const bool = Boolean(parseInt(finished))
+        bookFilter = bookFilter.filter((book) => 
+            book.finished === bool
+        );
+    };
     
     const response = h.response({
         status: 'success',
         data: {
-            books: booksFilter
+            books: bookFilter.map(book => ({
+                id: book.id,
+                name: book.name,
+                publisher: book.publisher
+            })),
         }
     });
     response.code(200);
@@ -78,10 +99,8 @@ const getAllBooksHandler = (req, h) => {
 const getBookByIdHandler = (req, h) => {
     const { bookId } = req.params;
 
-    const book = books.filter((n) => n.id === bookId)[0];
-
-    console.log(book)
-
+    let book = books.filter((n) => n.id === bookId)[0];
+    
     if(book !== undefined) {
         return {
             status: 'success',
@@ -89,7 +108,7 @@ const getBookByIdHandler = (req, h) => {
                 book,
             },
         };
-    }
+    };
 
     const response = h.response({
         status: 'fail',
@@ -102,8 +121,7 @@ const getBookByIdHandler = (req, h) => {
 
 const editBookByIdHandler = (req, h) =>{
     const { bookId } = req.params;
-    const { name, year, author, summary, publisher, pageCount, readPage } = req.payload;
-    let { reading } = req.payload;
+    const { name, year, author, summary, publisher, pageCount, readPage, reading } = req.payload;
     let finished = false;
     const updatedAt = new Date().toISOString();
 
@@ -117,7 +135,7 @@ const editBookByIdHandler = (req, h) =>{
               });
               response.code(400);
               return response;
-        } 
+        };
 
         if(index !== -1){
             if (readPage === pageCount){
@@ -144,7 +162,7 @@ const editBookByIdHandler = (req, h) =>{
               });
               response.code(200);
               return response;
-        }
+        };
 
         const response = h.response({
             status: 'fail',
@@ -152,7 +170,7 @@ const editBookByIdHandler = (req, h) =>{
           });
           response.code(404);
           return response;
-    }
+    };
 
     const response = h.response({
         status: 'fail',
@@ -174,7 +192,7 @@ const deleteNoteByIdHandler = (req, h) =>{
         });
         response.code(200);
         return response;
-      }
+      };
 
       const response = h.response({
           status: 'fail',
@@ -184,4 +202,4 @@ const deleteNoteByIdHandler = (req, h) =>{
         return response;
 };
 
-module.exports = { addBookHandler, getAllBooksHandler, getBookByIdHandler, editBookByIdHandler, deleteNoteByIdHandler}
+module.exports = { addBookHandler, getAllBooksHandler, getBookByIdHandler, editBookByIdHandler, deleteNoteByIdHandler};
